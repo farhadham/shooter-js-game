@@ -43,8 +43,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("machineMove", machineData);
   });
 
-  socket.on("projectile0", (projectileData0) => {
-    // console.log(projectileData0);
-    socket.broadcast.emit("projectile0", projectileData0);
+  socket.on("projectileBottom", (projectileDataBottom) => {
+    // console.log(projectileDataBottom;
+    socket.broadcast.emit("projectileBottom", projectileDataBottom);
   });
 });

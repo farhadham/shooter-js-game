@@ -12,8 +12,8 @@ let height = 700;
 let machineWidth = 50;
 let machineX = [225, 225];
 
-let projectiles0 = [];
-let projectiles1 = [];
+let projectilesBottom = [];
+let projectilesTop = [];
 
 let shootController0 = true;
 let shootController1 = true;
@@ -71,31 +71,29 @@ function renderCanvas() {
 
   //projectiles
 
-  projectiles0.map((p) => {
+  projectilesBottom.map((p) => {
     context.fillStyle = "brown";
     context.fillRect(p.projectileX - 2.5, p.projectileY, 5, 30);
   });
 
   if (isReferee) {
     canvas.addEventListener("click", () => {
-      {
-        if (shootController0) {
-          projectiles0.unshift({
-            projectileY: height - (machineWidth + 10 + 30),
-            projectileX: machineX[machineIndex] + machineWidth / 2,
-          });
-          shootController0 = false;
-        }
+      if (shootController0) {
+        projectilesBottom.push({
+          projectileY: height - (machineWidth + 10 + 30),
+          projectileX: machineX[machineIndex] + machineWidth / 2,
+        });
+        shootController0 = false;
       }
     });
-    console.log(projectiles0);
+    // console.log(projectilesBottom);
   }
 
   // if (machineIndex === 1) {
   //   canvas.addEventListener("click", () => {
   //     {
   //       if (shootController1) {
-  //         projectiles0.unshift({
+  //         projectilesBottom.push({
   //           projectileY: height - (machineWidth + 10 + 30),
   //           projectileX: machineX[machineIndex] + machineWidth / 2,
   //         });
@@ -120,22 +118,22 @@ if (shootController1 === false) {
 }
 
 const projectileShoot = () => {
-  projectiles0.map((p) => {
+  projectilesBottom.map((p) => {
     if (!touched) {
       p.projectileY += -7;
     }
+    if (isReferee) {
+      socket.emit("projectileBottom", {
+        projectilesBottom: projectilesBottom,
+      });
+    }
   });
 
-  socket.emit("projectile0", {
-    x: projectiles0.projectileX,
-    y: projectiles0.projectileY,
-  });
-
-  // console.log(projectiles0);
+  // console.log(projectilesBottom);
 };
 
 const touchCheck = () => {
-  projectiles0.map((p) => {
+  projectilesBottom.map((p) => {
     if (
       p.projectileX > machineX[1] &&
       p.projectileX < machineX[1] + machineWidth / 2
@@ -215,13 +213,14 @@ socket.on("startGame", (refereeId) => {
 
 socket.on("machineMove", (machineData) => {
   //toggle 1 into 0 and 0 into 1
+
   const opponentMachineIndex = 1 - machineIndex;
   machineX[opponentMachineIndex] = machineData.xPosition;
 });
 
-socket.on("projectile0", (projectileData0) => {
-  projectiles0.unshift({
-    projectileX: projectileData0.x,
-    projectileY: projectileData0.y,
-  });
+socket.on("projectileBottom", (projectileDataBottom) => {
+  console.log(projectileDataBottom);
+  if (!isReferee) {
+    projectilesBottom = [...projectileDataBottom.projectilesBottom];
+  }
 });
