@@ -1,19 +1,3 @@
-// const app = require("express")();
-// const httpServer = require("http").createServer(app);
-// const options = {
-//   cors: {
-//     origin: "http://127.0.0.1:5500",
-//     methods: ["GET", "POST"],
-//   },
-// };
-// const io = require("socket.io")(httpServer, options);
-
-// io.on("connection", (socket) => {
-//   console.log("user connected");
-// });
-
-// httpServer.listen(3000, console.log("server is running"));
-
 const httpServer = require("http").createServer();
 const io = require("socket.io")(httpServer, {
   cors: {
@@ -34,7 +18,7 @@ io.on("connection", (socket) => {
 
     readyPlayerCount++;
 
-    if (readyPlayerCount === 2) {
+    if (readyPlayerCount % 2 === 0) {
       io.emit("startGame", socket.id);
     }
   });
@@ -46,5 +30,14 @@ io.on("connection", (socket) => {
   socket.on("projectileBottom", (projectileDataBottom) => {
     // console.log(projectileDataBottom;
     socket.broadcast.emit("projectileBottom", projectileDataBottom);
+  });
+
+  socket.on("projectileTop", (projectileDataTop) => {
+    // console.log(projectileDataBottom;
+    socket.broadcast.emit("projectileTop", projectileDataTop);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log(`Client ${socket.id} disconnected: ${reason}`);
   });
 });
