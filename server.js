@@ -12,7 +12,7 @@ const socketServer = io(httpServer, {
 });
 const sockets = require("./sockets.js");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, console.log("server is running"));
 
 sockets(socketServer);
