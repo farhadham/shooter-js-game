@@ -1,45 +1,51 @@
 let readyPlayerCount = 0;
+let room = [];
+let roomData;
 
 function listen(io) {
   const shooterNamespace = io.of("/shooter");
   shooterNamespace.on("connection", (socket) => {
-    let room = "room" + Math.floor(readyPlayerCount / 2);
-
     console.log("user connected", socket.id);
 
+    socket.on("roomCreated", (rm) => {
+      room.push({ roomName: rm.roomName });
+      console.log(`room ${rm.roomName} created`);
+    });
+    socket.on("roomJoined", (rm) => {
+      roomData = room.find((element) => {
+        return element.roomName === rm.roomName;
+      });
+      if (roomData) {
+        socket.join(roomData);
+        console.log(`Player ready`, socket.id, roomData);
+      }
+    });
+
     socket.on("ready", () => {
-      socket.join(room);
-
-      console.log(`Player ready`, socket.id, room);
-
-      readyPlayerCount++;
-
-      if (readyPlayerCount % 2 === 0) {
-        shooterNamespace.in(room).emit("startGame", socket.id);
+      if (roomData) {
+        shooterNamespace.in(roomData).emit("startGame", socket.id);
       }
     });
 
     socket.on("machineMove", (machineData) => {
-      socket.to(room).emit("machineMove", machineData);
+      socket.to(roomData).emit("machineMove", machineData);
     });
 
     socket.on("projectileBottom", (projectileDataBottom) => {
       // console.log(projectileDataBottom;
-      socket.to(room).emit("projectileBottom", projectileDataBottom);
+      socket.to(roomData).emit("projectileBottom", projectileDataBottom);
     });
 
     socket.on("projectileTop", (projectileDataTop) => {
       // console.log(projectileDataBottom;
-      socket.to(room).emit("projectileTop", projectileDataTop);
+      socket.to(roomData).emit("projectileTop", projectileDataTop);
     });
 
     socket.on("disconnect", (reason) => {
       console.log(`Client ${socket.id} disconnected: ${reason}`);
-      socket.leave(room);
+      socket.leave(roomData);
     });
   });
 }
-
-console.log(readyPlayerCount);
 
 module.exports = listen;

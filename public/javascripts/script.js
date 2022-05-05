@@ -1,7 +1,30 @@
 // Canvas Related
 const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d");
+
 const socket = io("/shooter");
+
+const input = document.getElementById("input");
+const createbutt = document.getElementById("create");
+const joinbutt = document.getElementById("join");
+
+createbutt.onclick = createroom;
+joinbutt.onclick = joinroom;
+
+function createroom() {
+  let roomData = input.value;
+  socket.emit("roomCreated", { roomName: roomData });
+
+  alert(roomData + " created");
+  alert("now enter the room name and click join");
+}
+
+function joinroom() {
+  let roomData = input.value;
+  socket.emit("roomJoined", { roomName: roomData });
+  socket.emit("ready");
+}
+
 let isReferee = false;
 let machineIndex;
 
@@ -150,7 +173,7 @@ const projectileShoot0 = () => {
 const projectileShoot1 = () => {
   projectilesTop.map((p) => {
     if (!touched1 && !isReferee) {
-      p.projectileY += 7;
+      p.projectileY += 3.5;
     }
 
     if (!isReferee) {
@@ -234,7 +257,6 @@ function animate() {
 function loadGame() {
   createCanvas();
   renderIntro();
-  socket.emit("ready");
 }
 
 function startGame() {
